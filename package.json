@@ -17,7 +17,6 @@
   ],
   "scripts": {
     "build": "bun build index.ts --outdir .opencode/plugins --target node --entry-naming \"caveman.[ext]\" --external @opencode-ai/plugin --external @opencode-ai/sdk",
-    "prepublishOnly": "bun run build",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
