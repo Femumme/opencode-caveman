@@ -37,7 +37,7 @@ Or reference from `~/.config/opencode/opencode.json`:
 
 ```json
 {
-  "plugin": ["opencode-caveman"]
+  "plugin": ["@mumme-it/opencode-caveman"]
 }
 ```
 
