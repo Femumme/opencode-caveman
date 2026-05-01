@@ -1,0 +1,31 @@
+{
+  "name": "opencode-caveman",
+  "version": "0.1.0",
+  "description": "OpenCode plugin — injects caveman compression rules every turn, survives /compact, supports live mode switching",
+  "keywords": ["opencode", "plugin", "caveman", "token", "compression"],
+  "license": "MIT",
+  "type": "module",
+  "main": ".opencode/plugins/caveman.js",
+  "exports": {
+    ".": {
+      "import": "./.opencode/plugins/caveman.js"
+    }
+  },
+  "files": [
+    ".opencode",
+    "skills"
+  ],
+  "scripts": {
+    "build": "bun build index.ts --outdir .opencode/plugins --target node --entry-naming \"caveman.[ext]\" --external @opencode-ai/plugin --external @opencode-ai/sdk",
+    "prepublishOnly": "bun run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.4.6",
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.8.0"
+  }
+}
