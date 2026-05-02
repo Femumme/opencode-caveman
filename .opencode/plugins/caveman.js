@@ -1,3 +1,7 @@
+// index.ts
+import { fileURLToPath } from "url";
+import path2 from "path";
+
 // tools/mode.ts
 import os from "os";
 import path from "path";
@@ -75,6 +79,8 @@ var caveman_set_level = tool({
 });
 
 // index.ts
+var __dirname2 = path2.dirname(fileURLToPath(import.meta.url));
+var SKILLS_DIR = path2.resolve(__dirname2, "..", "..", "skills");
 var COMMAND_ALIASES = {
   caveman: "full",
   "caveman lite": "lite",
@@ -96,6 +102,13 @@ var CavemanPlugin = async (_ctx) => {
   return {
     tool: {
       caveman_set_level
+    },
+    config: async (config) => {
+      config.skills = config.skills || {};
+      config.skills.paths = config.skills.paths || [];
+      if (!config.skills.paths.includes(SKILLS_DIR)) {
+        config.skills.paths.push(SKILLS_DIR);
+      }
     },
     "experimental.chat.system.transform": async (_input, output) => {
       const level = loadActiveLevel();

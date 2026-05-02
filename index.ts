@@ -1,9 +1,14 @@
+import { fileURLToPath } from "url"
+import path from "path"
 import type { Plugin, ToolContext } from "@opencode-ai/plugin"
 import type { Part } from "@opencode-ai/sdk"
 import { loadActiveLevel } from "./tools/mode.ts"
 import { systemRules, compactionContext } from "./tools/rules.ts"
 import { caveman_set_level } from "./tools/set-level.ts"
 import type { CavemanLevel } from "./tools/mode.ts"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const SKILLS_DIR = path.resolve(__dirname, "..", "..", "skills")
 
 const COMMAND_ALIASES: Record<string, CavemanLevel> = {
   "caveman": "full",
@@ -32,6 +37,18 @@ export const CavemanPlugin: Plugin = async (_ctx) => {
   return {
     tool: {
       caveman_set_level,
+    },
+
+    /**
+     * Register the plugin's skills/ directory so opencode discovers
+     * caveman-lite, caveman-full, caveman-ultra, caveman-off skills.
+     */
+    config: async (config: any) => {
+      config.skills = config.skills || {}
+      config.skills.paths = config.skills.paths || []
+      if (!config.skills.paths.includes(SKILLS_DIR)) {
+        config.skills.paths.push(SKILLS_DIR)
+      }
     },
 
     /**
