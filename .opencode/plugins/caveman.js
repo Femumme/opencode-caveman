@@ -80,6 +80,10 @@ var COMMAND_ALIASES = {
   "caveman lite": "lite",
   "caveman full": "full",
   "caveman ultra": "ultra",
+  "caveman-lite": "lite",
+  "caveman-full": "full",
+  "caveman-ultra": "ultra",
+  "caveman-off": "off",
   "stop caveman": "off",
   "normal mode": "off"
 };

@@ -10,6 +10,10 @@ const COMMAND_ALIASES: Record<string, CavemanLevel> = {
   "caveman lite": "lite",
   "caveman full": "full",
   "caveman ultra": "ultra",
+  "caveman-lite": "lite",
+  "caveman-full": "full",
+  "caveman-ultra": "ultra",
+  "caveman-off": "off",
   "stop caveman": "off",
   "normal mode": "off",
 }
