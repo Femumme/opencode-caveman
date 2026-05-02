@@ -1,6 +1,6 @@
 {
   "name": "@mumme-it/opencode-caveman",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "OpenCode plugin — injects caveman compression rules every turn, survives /compact, supports live mode switching",
   "keywords": ["opencode", "plugin", "caveman", "token", "compression"],
   "license": "MIT",
