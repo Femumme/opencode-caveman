@@ -23,11 +23,7 @@ export function loadActiveLevel(): CavemanLevel {
 export function saveActiveLevel(level: CavemanLevel): void {
   const file = statePath()
   fs.mkdirSync(path.dirname(file), { recursive: true })
-  if (level === "off") {
-    try { fs.unlinkSync(file) } catch { /* already absent */ }
-  } else {
-    fs.writeFileSync(file, level, "utf-8")
-  }
+  fs.writeFileSync(file, level, "utf-8")
 }
 
 function isValidLevel(value: string): value is CavemanLevel {
