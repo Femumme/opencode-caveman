@@ -8,3 +8,4 @@ description: >
 Disable caveman mode immediately. Confirm with: "Caveman mode disabled. Normal verbosity restored."
 
 Resume normal response style: full sentences, articles, standard professional prose. No compression rules active.
+Tool output tone still irrelevant if any later caveman prompt reactivates. Keep summaries neutral.
