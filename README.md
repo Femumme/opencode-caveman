@@ -18,22 +18,9 @@ Three layers, each strengthening the last:
 | Live mode switching | `index.ts` → `command.execute.before` + `caveman_set_level` tool | `/caveman` commands intercepted before reaching model. Mode written to `~/.config/opencode/.caveman-active` — persists across sessions. |
 | On-demand skill | `skills/caveman/SKILL.md` | Loadable via skill picker for intensity switching docs. |
 
-This mirrors how the [original caveman](https://github.com/JuliusBrussee/caveman) works in Claude Code: SessionStart hook injects rules as hidden system context; UserPromptSubmit hook re-injects a small reminder every turn; flag file persists mode across sessions.
-
 ## Install
 
-### Option A — plugin (full enforcement, recommended)
-
-Build and copy to OpenCode's global plugin directory:
-
-```sh
-cd opencode-caveman
-bun install
-bun run build
-cp .opencode/plugins/caveman.js ~/.config/opencode/plugins/caveman.js
-```
-
-Or reference from `~/.config/opencode/opencode.json`:
+Add to `~/.config/opencode/opencode.json`:
 
 ```json
 {
@@ -41,33 +28,9 @@ Or reference from `~/.config/opencode/opencode.json`:
 }
 ```
 
-### Option B — AGENTS.md only (no code, simpler)
-
-Copy `AGENTS.md` globally:
-
-```sh
-cp AGENTS.md ~/.config/opencode/AGENTS.md
-```
-
-Add to `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "instructions": ["AGENTS.md"]
-}
-```
-
-Rules load at session start. No per-turn enforcement or compaction survival.
-
-### Option C — skill only (on-demand)
-
-```sh
-cp -r skills/caveman ~/.config/opencode/skills/caveman
-```
-
-Activate per-session: `ctrl+p → Load Skill → caveman`.
-
 ## Modes
+
+Switch intensity via `ctrl+p → Skills → caveman-lite / caveman-full / caveman-ultra`.
 
 | Command | Effect |
 |---------|--------|
