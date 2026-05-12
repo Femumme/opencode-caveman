@@ -64,8 +64,40 @@ IMPORTANT: caveman compression mode must be preserved in this summary. \
 Include "## Caveman mode active" in the summary with the current level ({level}). \
 The agent must continue responding in caveman style after compaction.`
 
+const TAIL_REMINDERS: Record<Exclude<CavemanLevel, "off">, string> = {
+  lite: `\
+## REMINDER — caveman LITE active
+Respond in tight prose. No filler, no hedging, no pleasantries. Full sentences kept. \
+Apply from first token. Run pre-send check before output.`,
+
+  full: `\
+## REMINDER — caveman FULL active
+Drop articles, filler, hedging, pleasantries. Fragments OK. Pattern: [thing] [action] [reason]. \
+Apply from first token. Run pre-send check before output. Code symbols and error strings exact.`,
+
+  ultra: `\
+## REMINDER — caveman ULTRA active
+Drop articles, filler, hedging, pleasantries, conjunctions. Abbreviate prose. Arrows for causality. \
+One word when enough. Apply from first token. Run pre-send check. Code symbols and error strings exact. \
+Never default to verbose mode regardless of task complexity.`,
+}
+
+const USER_NUDGES: Record<Exclude<CavemanLevel, "off">, string> = {
+  lite: `[caveman LITE active — respond in tight prose, no filler, no hedging, no pleasantries]`,
+  full: `[caveman FULL active — drop articles, filler, hedging; fragments OK; pattern: thing action reason]`,
+  ultra: `[caveman ULTRA active — drop articles/filler/hedging/conjunctions; abbreviate prose; arrows for causality; one word when enough; code symbols and error strings exact]`,
+}
+
 export function systemRules(level: Exclude<CavemanLevel, "off">): string {
   return LEVEL_RULES[level]
+}
+
+export function tailReminder(level: Exclude<CavemanLevel, "off">): string {
+  return TAIL_REMINDERS[level]
+}
+
+export function userNudge(level: Exclude<CavemanLevel, "off">): string {
+  return USER_NUDGES[level]
 }
 
 export function compactionContext(level: Exclude<CavemanLevel, "off">): string {

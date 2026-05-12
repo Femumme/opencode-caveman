@@ -3,7 +3,7 @@ import path from "path"
 import type { Plugin, ToolContext } from "@opencode-ai/plugin"
 import type { Part } from "@opencode-ai/sdk"
 import { loadActiveLevel } from "./tools/mode.ts"
-import { systemRules, compactionContext } from "./tools/rules.ts"
+import { systemRules, tailReminder, userNudge, compactionContext } from "./tools/rules.ts"
 import { caveman_set_level } from "./tools/set-level.ts"
 import type { CavemanLevel } from "./tools/mode.ts"
 
@@ -55,11 +55,49 @@ export const CavemanPlugin: Plugin = async (_ctx) => {
      * Inject caveman rules into the system prompt on every LLM call.
      * Equivalent to Claude Code's per-turn UserPromptSubmit hookSpecificOutput.
      * Rules are visible to the model every turn — prevents drift after /compact.
+     *
+     * Exploit U-shaped attention: full rules at top (highest priority position),
+     * condensed reminder at bottom (last thing model reads before generating).
+     * Middle context is most likely to be ignored by long-context models.
      */
     "experimental.chat.system.transform": async (_input, output) => {
       const level = loadActiveLevel()
       if (level === "off") return
-      output.system.push(systemRules(level as Exclude<CavemanLevel, "off">))
+      const concrete = level as Exclude<CavemanLevel, "off">
+      output.system.unshift(systemRules(concrete))
+      output.system.push(tailReminder(concrete))
+    },
+
+    /**
+     * Append a synthetic reminder part to the LAST message every turn,
+     * regardless of role. This guarantees the nudge sits immediately before
+     * the model's next generation point — maximum recency.
+     *
+     * Why "last message" not "last user message":
+     * - During tool loops (assistant → tool → assistant → tool…), the last
+     *   message is often a tool result, not a user message. A reminder
+     *   anchored to the last user msg gets buried under tool outputs.
+     * - Anchoring to the absolute tail keeps the nudge adjacent to the
+     *   generation point on every turn, regardless of conversation shape.
+     *
+     * Marked synthetic so UI can hide it. Single nudge per turn → ~30 tokens.
+     */
+    "experimental.chat.messages.transform": async (_input, output) => {
+      const level = loadActiveLevel()
+      if (level === "off") return
+      const concrete = level as Exclude<CavemanLevel, "off">
+
+      const last = output.messages[output.messages.length - 1]
+      if (!last) return
+
+      last.parts.push({
+        id: crypto.randomUUID(),
+        sessionID: last.info.sessionID,
+        messageID: last.info.id,
+        type: "text",
+        text: userNudge(concrete),
+        synthetic: true,
+      } as Part)
     },
 
     /**

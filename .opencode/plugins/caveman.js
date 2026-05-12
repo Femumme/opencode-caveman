@@ -21,13 +21,7 @@ function loadActiveLevel() {
 function saveActiveLevel(level) {
   const file = statePath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  if (level === "off") {
-    try {
-      fs.unlinkSync(file);
-    } catch {}
-  } else {
-    fs.writeFileSync(file, level, "utf-8");
-  }
+  fs.writeFileSync(file, level, "utf-8");
 }
 function isValidLevel(value) {
   return value === "lite" || value === "full" || value === "ultra" || value === "off";
@@ -77,8 +71,27 @@ ${BASE_CONTRACT}
 ${PRE_SEND_CHECK}`
 };
 var COMPACTION_SUFFIX = `IMPORTANT: caveman compression mode must be preserved in this summary. Include "## Caveman mode active" in the summary with the current level ({level}). The agent must continue responding in caveman style after compaction.`;
+var TAIL_REMINDERS = {
+  lite: `## REMINDER — caveman LITE active
+Respond in tight prose. No filler, no hedging, no pleasantries. Full sentences kept. Apply from first token. Run pre-send check before output.`,
+  full: `## REMINDER — caveman FULL active
+Drop articles, filler, hedging, pleasantries. Fragments OK. Pattern: [thing] [action] [reason]. Apply from first token. Run pre-send check before output. Code symbols and error strings exact.`,
+  ultra: `## REMINDER — caveman ULTRA active
+Drop articles, filler, hedging, pleasantries, conjunctions. Abbreviate prose. Arrows for causality. One word when enough. Apply from first token. Run pre-send check. Code symbols and error strings exact. Never default to verbose mode regardless of task complexity.`
+};
+var USER_NUDGES = {
+  lite: `[caveman LITE active — respond in tight prose, no filler, no hedging, no pleasantries]`,
+  full: `[caveman FULL active — drop articles, filler, hedging; fragments OK; pattern: thing action reason]`,
+  ultra: `[caveman ULTRA active — drop articles/filler/hedging/conjunctions; abbreviate prose; arrows for causality; one word when enough; code symbols and error strings exact]`
+};
 function systemRules(level) {
   return LEVEL_RULES[level];
+}
+function tailReminder(level) {
+  return TAIL_REMINDERS[level];
+}
+function userNudge(level) {
+  return USER_NUDGES[level];
 }
 function compactionContext(level) {
   return COMPACTION_SUFFIX.replace("{level}", level);
@@ -144,7 +157,26 @@ var CavemanPlugin = async (_ctx) => {
       const level = loadActiveLevel();
       if (level === "off")
         return;
-      output.system.push(systemRules(level));
+      const concrete = level;
+      output.system.unshift(systemRules(concrete));
+      output.system.push(tailReminder(concrete));
+    },
+    "experimental.chat.messages.transform": async (_input, output) => {
+      const level = loadActiveLevel();
+      if (level === "off")
+        return;
+      const concrete = level;
+      const last = output.messages[output.messages.length - 1];
+      if (!last)
+        return;
+      last.parts.push({
+        id: crypto.randomUUID(),
+        sessionID: last.info.sessionID,
+        messageID: last.info.id,
+        type: "text",
+        text: userNudge(concrete),
+        synthetic: true
+      });
     },
     "experimental.session.compacting": async (_input, output) => {
       const level = loadActiveLevel();
